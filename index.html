@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>To&amp;To Studio — Galerie de tatouage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="image-slot.js"></script>
+
+<style>
+  :root{
+    --paper: #e8e4dc;
+    --paper-2: #ddd9d0;
+    --paper-deep: #cfcabf;
+    --ink: #1a1a24;
+    --ink-soft: #2e2e3a;
+    --ink-mute: #535360;
+    --accent: #701830;
+    --accent-soft: rgba(112, 24, 48, 0.12);
+    --rule: rgba(30, 30, 40, 0.22);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{ background: var(--accent); color: var(--paper); }
+
+  /* ---------- Texture papier japonais (tile, full page) ---------- */
+  .paper-bg{
+    position: fixed; inset: 0; pointer-events:none; z-index: 0;
+    background-color: #e8e4dc;
+    background-image: url('washi4.jpg');
+    background-repeat: repeat;
+    background-size: 800px 800px;
+  }
+  .paper-fibers, .paper-grain{ display:none; }
+
+  main{ position: relative; z-index: 5; }
+
+  /* ---------- Type system ---------- */
+  .serif{ font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; }
+  .display{ font-family:'Cormorant Garamond', serif; font-weight: 300; letter-spacing:-0.01em; line-height:0.92; }
+  .hand{ font-family: 'Caveat', cursive; }
+  .micro{
+    font-family:'Inter', sans-serif; font-weight: 500;
+    font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .mute{ color: var(--ink-mute); }
+
+  /* Focus visible — RGAA */
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  /* Skip link */
+  .skip-link{
+    position:absolute; left:-9999px; top: 8px;
+    background: var(--ink); color: var(--paper); padding: 10px 16px;
+    text-decoration: none; font-size: 14px; z-index: 999;
+  }
+  .skip-link:focus{ left: 8px; }
+
+  /* ---------- Layout primitives ---------- */
+  .wrap{ max-width: 1320px; margin: 0 auto; padding: 0 56px; }
+  .wrap-narrow{ max-width: 980px; margin: 0 auto; padding: 0 56px; }
+  @media (max-width: 720px){
+    .wrap, .wrap-narrow{ padding: 0 24px; }
+  }
+
+  hr.brush{
+    border:0; height: 22px;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 22' preserveAspectRatio='none'><path d='M2 12 C 80 4, 160 18, 260 11 S 480 6, 598 13' stroke='%231a1a26' stroke-width='1.2' fill='none' stroke-linecap='round' opacity='0.55'/></svg>") center / 100% 100% no-repeat;
+    margin: 0;
+  }
+
+  /* ---------- Nav logo ---------- */
+  .nav-logo{ display:flex; align-items:center; gap:12px; cursor:default; }
+  .nav-logo img{ height: 44px; width: auto; display:block; }
+  .nav.scrolled .nav-logo img{ height: 36px; transition: height .4s; }
+
+  /* ---------- Hero logo with brush-reveal animation ---------- */
+  .hero-logo{
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: grid; place-items: center;
+  }
+  .hero-logo svg.mask-svg{ position:absolute; width:0; height:0; }
+  .hero-logo .logo-img{
+    width: 88%; height: auto;
+    -webkit-mask-image: url('#brushReveal');
+    mask: url('#brushReveal');
+  }
+  /* Three brushstrokes drawn in sequence, then the logo fades in on top of them */
+  .brush-stage{
+    position: relative;
+    width: 100%; height: 100%;
+    display: grid; place-items: center;
+  }
+  .brush-stage img{
+    width: 86%; max-width: 520px; height: auto;
+    opacity: 0;
+    animation: logoFade 1.6s ease-out 1.6s forwards;
+  }
+  .brush-stage svg.brushes{
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .brush-stage svg.brushes path{
+    fill: none;
+    stroke: var(--accent);
+    stroke-linecap: round;
+    stroke-dasharray: 1200;
+    stroke-dashoffset: 1200;
+    opacity: 0.85;
+    animation: brushDraw 1.1s cubic-bezier(.55,.05,.4,1) forwards, brushFade 1.4s ease-out 2.2s forwards;
+  }
+  .brush-stage svg.brushes path.b1{ stroke-width: 26; animation-delay: 0.2s, 2.2s; }
+  .brush-stage svg.brushes path.b2{ stroke-width: 22; animation-delay: 0.55s, 2.4s; }
+  .brush-stage svg.brushes path.b3{ stroke-width: 18; animation-delay: 0.9s, 2.6s; }
+  @keyframes brushDraw{
+    from{ stroke-dashoffset: 1200; }
+    to{ stroke-dashoffset: 0; }
+  }
+  @keyframes brushFade{
+    from{ opacity: 0.85; }
+    to{ opacity: 0; }
+  }
+  @keyframes logoFade{
+    from{ opacity: 0; transform: scale(0.96); }
+    to{ opacity: 1; transform: scale(1); }
+  }
+  .nav{
+    position: fixed; top:0; left:0; right:0; z-index: 50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 22px 48px;
+    transition: background .5s ease, backdrop-filter .5s ease, padding .4s ease, color .4s ease;
+  }
+  .nav.scrolled{
+    background: rgba(232, 228, 220, 0.78);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    padding: 14px 48px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .nav.on-dark{ color: var(--paper); }
+  /* (legacy seal styles removed — replaced by .nav-logo img above) */
+  .nav-links{ display:flex; gap: 36px; }
+  .nav-links a{
+    color: inherit; text-decoration: none;
+    font-size: 14px; letter-spacing: .12em; text-transform: uppercase;
+    font-weight: 500;
+    position: relative; padding: 4px 0;
+  }
+  .nav-links a::after{
+    content:''; position:absolute; left:0; bottom:0; height:1px; width: 100%;
+    background: currentColor; transform-origin: left; transform: scaleX(0);
+    transition: transform .5s cubic-bezier(.7,0,.2,1);
+  }
+  .nav-links a:hover::after{ transform: scaleX(1); }
+  .nav-cta{
+    font-size: 14px; letter-spacing: .12em; text-transform: uppercase;
+    font-weight: 500;
+    padding: 12px 20px; border: 1px solid currentColor;
+    color: inherit; text-decoration: none;
+    transition: background .3s, color .3s;
+  }
+  .nav-cta:hover{ background: var(--accent); border-color: var(--accent); color: var(--paper); }
+
+  @media (max-width: 860px){
+    .nav-links{ display:none }
+    .nav, .nav.scrolled{ padding: 16px 24px; }
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position: relative; min-height: 100vh;
+    padding: 14vh 0 6vh;
+    display:flex; align-items:center;
+    overflow: hidden;
+  }
+  .hero-grid{
+    display:grid; grid-template-columns: 0.85fr 1.15fr; gap: 48px; width:100%;
+    align-items: center;
+  }
+  @media (max-width: 920px){
+    .hero-grid{ grid-template-columns: 1fr; gap: 36px; }
+  }
+  .hero h1{
+    margin: 0;
+    font-family:'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: clamp(54px, 9vw, 138px);
+    line-height: 0.9;
+    letter-spacing: -0.015em;
+  }
+  .hero h1 em{
+    font-style: italic; font-weight: 400;
+    color: var(--accent);
+  }
+  .hero .lede{
+    margin-top: 28px; max-width: 480px;
+    font-size: 19px; line-height: 1.7; color: var(--ink-soft);
+  }
+  .hero .meta{
+    display:flex; gap: 22px; margin-top: 36px; align-items: center;
+    color: var(--ink-mute);
+  }
+  .hero .meta .dot{ width: 4px; height: 4px; border-radius: 50%; background: var(--ink-mute); }
+
+  /* ---------- Hero stage (logo only, very large) ---------- */
+  .hero-art{
+    position: relative;
+    width: 100%;
+    display: grid; place-items: center;
+  }
+  .hero-logo{
+    width: 145%;
+    max-width: none;
+    height: auto;
+    display: block;
+    margin-right: -10%;
+  }
+
+  /* hero brushstroke vertical */
+  .hero-brush{
+    position:absolute; left: -40px; top: 14vh; width: 130px; height: 70vh;
+    pointer-events:none; opacity: .9;
+  }
+
+  /* ---------- Marquee ---------- */
+  .marquee{
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden; padding: 22px 0;
+    background: rgba(200, 195, 185, 0.3);
+  }
+  .marquee-track{
+    display: flex; gap: 64px; white-space: nowrap;
+    animation: scroll 38s linear infinite;
+  }
+  .marquee span{
+    font-family:'Cormorant Garamond', serif; font-style: italic; font-weight: 400;
+    font-size: 24px; color: var(--ink-soft);
+  }
+  .marquee i{ color: var(--accent); font-style: normal; }
+  @keyframes scroll{
+    from{ transform: translateX(0); }
+    to{ transform: translateX(-50%); }
+  }
+
+  /* ---------- Section ---------- */
+  section.block{ padding: 12vh 0; position: relative; }
+  .section-eyebrow{
+    display:flex; gap: 14px; align-items:center; margin-bottom: 28px;
+  }
+  .section-eyebrow .num{
+    font-family:'Cormorant Garamond', serif; font-style: italic;
+    color: var(--accent); font-size: 18px;
+  }
+  .section-eyebrow .lab{ }
+  h2.block-title{
+    font-family:'Cormorant Garamond', serif; font-weight: 300;
+    font-size: clamp(40px, 6vw, 84px); line-height: 1; letter-spacing:-0.01em;
+    margin: 0 0 36px;
+    max-width: 880px;
+  }
+  h2.block-title em{ font-style: italic; color: var(--accent); }
+
+  /* ---------- Manifeste (sur encre) ---------- */
+  .manifest{
+    background: var(--ink);
+    color: var(--paper);
+    padding: 18vh 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .manifest::before{
+    content:''; position:absolute; inset:0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence baseFrequency='0.85' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.4 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.35'/></svg>");
+    mix-blend-mode: overlay; opacity: .5; pointer-events:none;
+  }
+  .manifest .quote{
+    font-family:'Cormorant Garamond', serif; font-weight: 300;
+    font-style: italic;
+    font-size: clamp(36px, 5vw, 72px);
+    line-height: 1.15; letter-spacing:-0.005em;
+    max-width: 1000px;
+  }
+  .manifest .quote em{ color: var(--accent); font-style:italic; }
+  .manifest .attrib{
+    margin-top: 56px;
+    display:flex; align-items:center; gap: 18px;
+    color: oklch(0.88 0.02 78 / 0.7);
+  }
+  .manifest .attrib .line{ width: 60px; height: 1px; background: currentColor; }
+
+  .manifest-grid{
+    display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    margin-top: 80px;
+  }
+  .manifest-grid .cell{
+    border-top: 1px solid oklch(0.88 0.02 78 / .25);
+    padding: 26px 0;
+    color: oklch(0.88 0.02 78 / 0.85);
+  }
+  .manifest-grid .cell .k{
+    font-family:'Cormorant Garamond', serif; font-style: italic;
+    color: var(--accent); font-size: 15px; margin-bottom: 6px;
+  }
+  .manifest-grid .cell h4{
+    font-family:'Cormorant Garamond', serif; font-weight: 400;
+    font-size: 24px; margin: 0 0 8px; color: var(--paper);
+  }
+  .manifest-grid .cell p{ margin: 0; font-size: 16px; line-height: 1.7; }
+  @media (max-width: 800px){
+    .manifest-grid{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Galerie ---------- */
+  .gallery-head{
+    display:flex; align-items: end; justify-content: space-between; gap: 32px;
+    margin-bottom: 48px; flex-wrap: wrap;
+  }
+  .filter-pills{ display:flex; gap: 6px; flex-wrap:wrap; }
+  .pill{
+    appearance:none; border: 1px solid var(--rule); background: transparent;
+    color: var(--ink-soft); font: inherit; font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
+    font-weight: 500;
+    padding: 11px 18px; cursor: default;
+    transition: all .3s; font-family: 'Inter', sans-serif;
+  }
+  .pill:hover{ color: var(--ink); border-color: var(--ink); }
+  .pill.active{
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .gallery{
+    display:grid; grid-template-columns: repeat(12, 1fr);
+    gap: 28px;
+  }
+  .work{
+    position: relative; cursor: default;
+    transition: transform .6s cubic-bezier(.4,0,.2,1), opacity .4s;
+  }
+  .work .frame{
+    position:relative; overflow: hidden; background: var(--paper-2);
+    aspect-ratio: 3/4;
+  }
+  .work image-slot{ position:absolute; inset:0; width:100%; height:100%; --is-bg: oklch(0.92 0.018 78); }
+  .work .info{
+    margin-top: 14px;
+    display: flex; align-items: baseline; justify-content: space-between;
+  }
+  .work .info .t{ font-family:'Cormorant Garamond', serif; font-style: italic; font-size: 22px; }
+  .work .info .meta{ font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); font-weight: 500; }
+  .work.hidden{ opacity: 0; pointer-events:none; transform: scale(.96); position:absolute; }
+
+  .work .frame::after{
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(180deg, transparent 60%, oklch(0 0 0 / .25));
+    opacity: 0; transition: opacity .5s;
+  }
+  .work:hover .frame::after{ opacity: 1; }
+  .work .tag{
+    position:absolute; left: 12px; bottom: 12px; z-index: 2;
+    color: var(--paper); font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
+    font-weight: 500;
+    opacity: 0; transform: translateY(6px); transition: all .5s;
+  }
+  .work:hover .tag{ opacity: 1; transform: translateY(0); }
+
+  /* spans */
+  .w-tall{ grid-column: span 4; }
+  .w-mid { grid-column: span 4; }
+  .w-wide{ grid-column: span 6; }
+  .w-tall .frame{ aspect-ratio: 3/4; }
+  .w-mid .frame{ aspect-ratio: 4/5; }
+  .w-wide .frame{ aspect-ratio: 4/3; }
+  @media (max-width: 900px){
+    .w-tall, .w-mid, .w-wide{ grid-column: span 6; }
+  }
+  @media (max-width: 560px){
+    .w-tall, .w-mid, .w-wide{ grid-column: span 12; }
+  }
+
+  /* ---------- Artistes ---------- */
+  .artists{
+    background: rgba(200, 195, 185, 0.22);
+    padding: 16vh 0;
+    position: relative;
+  }
+  .artist-row{
+    display:grid; grid-template-columns: 280px 1fr 1fr; gap: 64px;
+    padding: 56px 0;
+    border-top: 1px solid var(--rule);
+    align-items: start;
+  }
+  .artist-row:last-child{ border-bottom: 1px solid var(--rule); }
+  .artist-row .pic{ aspect-ratio: 3/4; position: relative; }
+  .artist-row .pic image-slot{ position:absolute; inset: 0; width:100%; height:100%; --is-bg: oklch(0.86 0.02 78); }
+  .artist-row .name{
+    font-family:'Cormorant Garamond', serif; font-weight: 300;
+    font-size: 56px; line-height: 1; margin: 0 0 18px;
+  }
+  .artist-row .name em{ font-style: italic; color: var(--accent); display:block; font-size: 22px; margin-top: 12px; }
+  .artist-row .bio{ color: var(--ink-soft); font-size: 17px; line-height: 1.75; }
+  .artist-row .specs{
+    list-style: none; padding: 0; margin: 0;
+    display:flex; flex-direction:column; gap: 12px;
+  }
+  .artist-row .specs li{
+    display:flex; gap: 16px; align-items: baseline;
+    border-bottom: 1px dotted var(--rule); padding-bottom: 10px;
+  }
+  .artist-row .specs li .k{
+    font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute);
+    font-weight: 500;
+    min-width: 100px;
+  }
+  .artist-row .specs li .v{ font-family:'Cormorant Garamond', serif; font-style: italic; font-size: 21px; }
+  @media (max-width: 900px){
+    .artist-row{ grid-template-columns: 1fr; gap: 24px; }
+    .artist-row .pic{ max-width: 360px; }
+  }
+
+  /* ---------- Process ---------- */
+  .process{ padding: 14vh 0; }
+  .steps{
+    display:grid; grid-template-columns: repeat(4, 1fr); gap: 40px;
+  }
+  .step{ position: relative; padding-top: 32px; }
+  .step .n{
+    font-family:'Cormorant Garamond', serif; font-style: italic; font-weight: 300;
+    color: var(--accent); font-size: 84px; line-height: 1;
+    position:absolute; top: -32px; left: -8px; opacity: .9;
+  }
+  .step h4{
+    font-family:'Cormorant Garamond', serif; font-weight: 400; font-size: 28px;
+    margin: 24px 0 12px; position: relative; z-index: 1;
+  }
+  .step p{ margin: 0; color: var(--ink-soft); font-size: 16px; line-height: 1.7; }
+  @media (max-width: 900px){
+    .steps{ grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 540px){
+    .steps{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Booking ---------- */
+  .booking{
+    background: var(--ink);
+    color: var(--paper);
+    padding: 16vh 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .booking::before{
+    content:''; position:absolute; inset:0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' seed='8'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.35'/></svg>");
+    mix-blend-mode: overlay; opacity: .55; pointer-events:none;
+  }
+  .booking-inner{
+    display:grid; grid-template-columns: 1fr 1.15fr; gap: 80px;
+    align-items: start; position: relative;
+  }
+  @media (max-width: 900px){ .booking-inner{ grid-template-columns: 1fr; gap: 48px; } }
+  .booking h2{ color: var(--paper); }
+  .booking h2 em{ color: var(--accent); }
+  .booking .lede{
+    color: #f0eee8; font-size: 19px; line-height: 1.75; max-width: 440px;
+  }
+  .booking .practical{
+    margin-top: 48px;
+    display:grid; grid-template-columns: repeat(2, 1fr); gap: 4px 32px;
+    color: #e0ddd5;
+    font-size: 15px;
+  }
+  .booking .practical .row{
+    border-top: 1px solid rgba(240, 238, 232, 0.3); padding: 16px 0;
+  }
+  .booking .practical .k{ display:block; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; margin-bottom: 6px; font-weight: 500; }
+
+  /* form */
+  .form-card{
+    background: oklch(0.96 0.012 82 / 0.06);
+    border: 1px solid oklch(0.96 0.012 82 / 0.16);
+    padding: 36px;
+    position: relative;
+  }
+  .form-progress{
+    display:flex; gap: 6px; margin-bottom: 28px;
+  }
+  .form-progress span{
+    flex: 1; height: 2px; background: oklch(0.96 0.012 82 / 0.18);
+    transition: background .5s;
+  }
+  .form-progress span.done{ background: var(--accent); }
+  .form-step .step-lab{
+    font-family:'Cormorant Garamond', serif; font-style: italic; color: var(--accent);
+    font-size: 18px; margin-bottom: 8px;
+  }
+  .form-step h3{
+    font-family:'Cormorant Garamond', serif; font-weight: 400; font-size: 36px;
+    margin: 0 0 24px;
+  }
+  .form-options{
+    display:grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+  }
+  .form-options.three{ grid-template-columns: repeat(3, 1fr); }
+  .form-options button{
+    appearance:none; background: transparent; color: var(--paper);
+    border: 1px solid rgba(240, 238, 232, 0.4);
+    padding: 18px 20px; text-align: left; cursor: default;
+    font: inherit; font-family:'Inter', sans-serif; font-size: 16px;
+    transition: all .25s;
+  }
+  .form-options button:hover{ border-color: var(--paper); }
+  .form-options button.sel{
+    background: var(--accent); border-color: var(--accent); color: #fff;
+  }
+  .form-options button .b{ display:block; font-family:'Cormorant Garamond', serif; font-style:italic; font-size: 22px; margin-bottom: 6px; }
+  .form-options button .s{ font-size: 13px; letter-spacing: .1em; text-transform: uppercase; opacity: .85; font-weight: 500; }
+  .form-input{
+    display:block; width: 100%;
+    background: transparent; color: var(--paper);
+    border: 0; border-bottom: 1px solid rgba(240, 238, 232, 0.5);
+    padding: 14px 0; font: inherit; font-family:'Inter', sans-serif; font-size: 16px;
+    margin-bottom: 18px;
+    outline: none;
+    transition: border-color .3s;
+  }
+  .form-input::placeholder{ color: rgba(240, 238, 232, 0.55); }
+  .form-input:focus{ border-color: var(--accent); }
+  textarea.form-input{ min-height: 96px; resize: vertical; font-family:'Inter', sans-serif; }
+  .form-actions{
+    display:flex; justify-content: space-between; align-items: center;
+    margin-top: 32px;
+  }
+  .btn-ghost, .btn-ink{
+    appearance:none; border: 1px solid var(--paper); background: transparent;
+    color: var(--paper); padding: 14px 28px;
+    font: inherit; font-size: 14px; letter-spacing: .12em; text-transform: uppercase;
+    font-weight: 500;
+    cursor: default; font-family:'Inter', sans-serif;
+    transition: all .3s;
+  }
+  .btn-ink{ background: var(--accent); border-color: var(--accent); }
+  .btn-ghost:hover:not(:disabled){ background: var(--paper); color: var(--ink); }
+  .btn-ink:hover:not(:disabled){ filter: brightness(1.1); }
+  .btn-ghost:disabled, .btn-ink:disabled{ opacity: .35; }
+
+  .form-success{
+    text-align: center; padding: 24px 0;
+  }
+  .form-success .seal-big{
+    width: 110px; height: 110px; margin: 0 auto 24px;
+    background: var(--accent); color: var(--paper);
+    display:grid; place-items:center;
+    font-family:'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+    font-size: 56px;
+    border-radius: 6px; transform: rotate(-6deg);
+    box-shadow: 0 0 0 1px oklch(0 0 0 / .1), 2px 3px 0 oklch(0 0 0 / .25);
+    animation: stamp 1s cubic-bezier(.5,1.6,.4,1);
+  }
+  .form-success h3{
+    font-family:'Cormorant Garamond', serif; font-weight: 300; font-size: 36px; margin: 0 0 8px;
+  }
+  .form-success p{ color: oklch(0.88 0.02 78 / 0.75); }
+
+  /* ---------- Footer ---------- */
+  footer{
+    padding: 64px 0 32px;
+    border-top: 1px solid var(--rule);
+  }
+  .foot-grid{
+    display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
+    align-items: start;
+  }
+  .foot-grid h5{
+    font-family: 'Inter', sans-serif; font-weight: 600;
+    font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-soft); margin: 0 0 18px;
+  }
+  .foot-grid a{
+    display:block; color: var(--ink); text-decoration: none;
+    margin-bottom: 10px; font-size: 16px;
+    transition: color .3s;
+  }
+  .foot-grid a:hover{ color: var(--accent); }
+  .foot-mark{
+    font-family:'Cormorant Garamond', serif; font-weight: 300;
+    font-size: 64px; line-height: 0.9; letter-spacing:-0.01em;
+    margin-bottom: 18px;
+  }
+  .foot-mark em{ font-style: italic; color: var(--accent); }
+  .foot-bottom{
+    display:flex; justify-content: space-between; align-items:center;
+    margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--rule);
+    color: var(--ink-mute); font-size: 14px;
+  }
+  @media (max-width: 800px){
+    .foot-grid{ grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ---------- Scroll reveal (brush mask) ---------- */
+  .reveal{
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 0%, transparent 0.1%);
+    mask-image: linear-gradient(90deg, #000 0%, #000 0%, transparent 0.1%);
+    -webkit-mask-size: 200% 100%;
+    mask-size: 200% 100%;
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+    transition: mask-position 1.2s cubic-bezier(.5,0,.2,1),
+                -webkit-mask-position 1.2s cubic-bezier(.5,0,.2,1),
+                opacity .8s, transform .8s;
+    opacity: 0; transform: translateY(12px);
+  }
+  .reveal.in{
+    -webkit-mask-position: 0% 0; mask-position: 0% 0;
+    opacity: 1; transform: none;
+  }
+  .reveal-up{
+    opacity: 0; transform: translateY(28px);
+    transition: opacity .9s ease-out, transform .9s cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal-up.in{ opacity: 1; transform: none; }
+
+  /* respiration douce du papier */
+  .breathe{ animation: breathe 14s ease-in-out infinite; }
+  @keyframes breathe{
+    0%,100%{ transform: translate3d(0, 0, 0); }
+    50%{ transform: translate3d(0, -6px, 0); }
+  }
+
+  /* curseur d'encre subtil */
+  .ink-cursor{
+    position: fixed; pointer-events: none; z-index: 9999;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent);
+    mix-blend-mode: multiply;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform .25s ease, opacity .25s;
+    opacity: 0;
+  }
+  body.has-cursor .ink-cursor{ opacity: .55; transform: translate(-50%, -50%) scale(1); }
+
+  /* drag image-slot styling */
+  image-slot{
+    --is-fg: var(--ink-mute);
+    --is-border: var(--rule);
+    --is-radius: 0;
+  }
+
+  /* ---------- Tweaks panel custom width ---------- */
+  .twk-panel{ width: 270px !important; }
+
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Aller au contenu principal</a>
+<div class="paper-bg"></div>
+
+<!-- Texture papier japonais -->
+<svg class="paper-fibers" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <defs>
+    <filter id="fibers" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.4" numOctaves="2" seed="5" />
+      <feColorMatrix values="0 0 0 0 0.5
+                             0 0 0 0 0.42
+                             0 0 0 0 0.32
+                             0 0 0 0.6 0"/>
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" filter="url(#fibers)" />
+</svg>
+<svg class="paper-grain" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <defs>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3" />
+      <feColorMatrix values="0 0 0 0 0.3
+                             0 0 0 0 0.25
+                             0 0 0 0 0.2
+                             0 0 0 0.45 0"/>
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" filter="url(#grain)" />
+</svg>
+
+<div class="ink-cursor"></div>
+
+<!-- ============== NAV ============== -->
+<nav class="nav" id="nav">
+  <div class="nav-logo">
+    <img src="logo.png" alt="To&amp;To Tattoo Studio Privé" />
+  </div>
+  <div class="nav-links">
+    <a href="#manifeste">Manifeste</a>
+    <a href="#galerie">Galerie</a>
+    <a href="#artistes">Artistes</a>
+    <a href="#process">Process</a>
+  </div>
+  <a class="nav-cta" href="#booking">Prendre rendez-vous</a>
+</nav>
+
+<main id="main">
+
+<!-- ============== HERO ============== -->
+<header class="hero">
+  <!-- Brushstroke vertical (deco) -->
+  <svg class="hero-brush" viewBox="0 0 130 700" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="rough" x="-20%" y="-5%" width="140%" height="110%">
+        <feTurbulence baseFrequency="0.04 0.02" numOctaves="2" seed="2" />
+        <feDisplacementMap in="SourceGraphic" scale="9" />
+      </filter>
+    </defs>
+    <path d="M65 10 C 50 200, 80 350, 60 530 C 50 620, 70 670, 65 690"
+          stroke="oklch(0.18 0.012 250)" stroke-width="34" fill="none"
+          stroke-linecap="round" opacity="0.9"
+          filter="url(#rough)" />
+  </svg>
+
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="micro mute" style="margin-bottom: 28px;">Studio de tatouage · Bordeaux</div>
+        <h1>
+          L'encre<br/>
+          <em style="color: rgb(128, 21, 46)">respire,</em><br/>
+          le geste<br/>
+          demeure.
+        </h1>
+        <p class="lede">
+          Un studio inspiré de la peinture asiatique. Chaque tatouage est pensé comme une pièce
+          unique — fluide, vivante, jamais répétée.
+        </p>
+        <div class="meta micro">
+          <span>Sur rendez-vous</span>
+          <span class="dot"></span>
+          <span>Un seul artiste</span>
+          <span class="dot"></span>
+          <span>Depuis 2019</span>
+        </div>
+      </div>
+      <div class="hero-art breathe">
+        <img class="hero-logo" src="logo-hd.png" alt="To&amp;To Tattoo — Studio Privé" style="width: 900px" />
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============== MARQUEE ============== -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span>Sumi-e</span><span><i>·</i></span>
+    <span>Ukiyo-e</span><span><i>·</i></span>
+    <span>Aquarelle</span><span><i>·</i></span>
+    <span>Trait spontané</span><span><i>·</i></span>
+    <span>Encre vivante</span><span><i>·</i></span>
+    <span>Pièces uniques</span><span><i>·</i></span>
+    <span>Sumi-e</span><span><i>·</i></span>
+    <span>Ukiyo-e</span><span><i>·</i></span>
+    <span>Aquarelle</span><span><i>·</i></span>
+    <span>Trait spontané</span><span><i>·</i></span>
+    <span>Encre vivante</span><span><i>·</i></span>
+    <span>Pièces uniques</span><span><i>·</i></span>
+  </div>
+</div>
+
+<!-- ============== MANIFESTE ============== -->
+<section class="manifest" id="manifeste">
+  <div class="wrap">
+    <div class="micro" style="color: var(--accent); margin-bottom: 28px;">— Manifeste 01</div>
+    <p class="quote reveal">
+      Nous tatouons comme on peint <em>à l'encre fraîche.</em><br/>
+      Un seul geste, retenu pendant des années. Le pinceau<br/>
+      ne <em>revient pas</em> sur sa trace.
+    </p>
+    <div class="attrib">
+      <span class="line"></span>
+      <span class="micro">To&amp;To · Bordeaux</span>
+    </div>
+
+    <div class="manifest-grid">
+      <div class="cell">
+        <div class="k">Premier mouvement</div>
+        <h4>Le geste</h4>
+        <p>Chaque ligne est tracée d'un seul tenant. Pas de retouche, pas de doute. La main porte ce que la pensée a laissé reposer.</p>
+      </div>
+      <div class="cell">
+        <div class="k">Deuxième mouvement</div>
+        <h4>L'espace vide</h4>
+        <p>Le papier qui respire compte autant que l'encre. Le silence du blanc compose la moitié du dessin — c'est le <span class="hand" style="font-size:18px;color:var(--accent);">ma</span>, l'intervalle.</p>
+      </div>
+      <div class="cell">
+        <div class="k">Troisième mouvement</div>
+        <h4>L'imperfection</h4>
+        <p>Le tremblement, la fuite, la goutte qui s'égare. Le tatouage garde la trace du moment où il est né.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== GALERIE ============== -->
+<section class="block" id="galerie">
+  <div class="wrap">
+    <div class="section-eyebrow">
+      <span class="num">02 —</span>
+      <span class="micro mute lab">Œuvres récentes</span>
+    </div>
+    <div class="gallery-head">
+      <h2 class="block-title">Carnet<br/>d'<em>encres.</em></h2>
+      <div id="filterBar"></div>
+    </div>
+    <div id="gallery"></div>
+  </div>
+</section>
+
+<!-- ============== ARTISTE ============== -->
+<section class="artists" id="artistes">
+  <div class="wrap">
+    <div class="section-eyebrow">
+      <span class="num">03 —</span>
+      <span class="micro mute lab">L'artiste du studio</span>
+    </div>
+    <h2 class="block-title">Une main,<br/>une <em>encre</em>.</h2>
+
+    <div class="artist-row reveal-up">
+      <div class="pic">
+        <image-slot id="art-toto" placeholder="Portrait — Toto" shape="rect"></image-slot>
+      </div>
+      <div>
+        <h3 class="name">Toto <em>— sumi-e &amp; trait spontané</em></h3>
+        <p class="bio">Toto tatoue comme il peint : d'un seul souffle. Formé à la peinture asiatique, il traduit dans la peau le vocabulaire du sumi-e et de l'aquarelle — créatures d'encre, fleurs, paysages dilués. Chaque pièce est dessinée pour une seule personne, jamais reproduite.</p>
+      </div>
+      <ul class="specs">
+        <li><span class="k">Style</span><span class="v">Sumi-e, aquarelle, calligraphie</span></li>
+        <li><span class="k">Trait</span><span class="v">Pinceau libre, lavis, taches</span></li>
+        <li><span class="k">Disponibilité</span><span class="v">Septembre 2026</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============== PROCESS ============== -->
+<section class="block process" id="process">
+  <div class="wrap">
+    <div class="section-eyebrow">
+      <span class="num">04 —</span>
+      <span class="micro mute lab">Comment nous travaillons</span>
+    </div>
+    <h2 class="block-title">Du papier<br/>à <em>la peau.</em></h2>
+
+    <div class="steps">
+      <div class="step reveal-up">
+        <div class="n">一</div>
+        <h4>Conversation</h4>
+        <p>Vous nous écrivez ce que vous portez. Image, mot, sensation. Pas besoin de référence parfaite — l'essentiel est ce qui se cache derrière.</p>
+      </div>
+      <div class="step reveal-up">
+        <div class="n">二</div>
+        <h4>Étude</h4>
+        <p>L'artiste prépare ses esquisses sur papier, à l'encre. Vous recevez un seul dessin — celui que la conversation a fait naître.</p>
+      </div>
+      <div class="step reveal-up">
+        <div class="n">三</div>
+        <h4>Séance</h4>
+        <p>Au studio, dans le silence. Le tracé est posé sans précipitation. Une pause, du thé, et le geste reprend.</p>
+      </div>
+      <div class="step reveal-up">
+        <div class="n">四</div>
+        <h4>Mémoire</h4>
+        <p>Le dessin original vous est offert, monté sur papier washi. Le tatouage et son origine, ensemble.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== BOOKING ============== -->
+<section class="booking" id="booking">
+  <div class="wrap">
+    <div class="booking-inner">
+      <div>
+        <div class="micro" style="color: var(--accent); margin-bottom: 28px;">— Prendre rendez-vous</div>
+        <h2 class="block-title">Demande<br/>de <em>séance.</em></h2>
+        <p class="lede">
+          Toto lit chaque demande, sans automatisme. Comptez deux à trois semaines de réponse,
+          le temps qu'il lise, dessine et reprenne contact.
+        </p>
+        <div class="practical">
+          <div class="row"><span class="k">Studio</span>Bordeaux centre</div>
+          <div class="row"><span class="k">Quartier</span>Saint-Pierre · Chartrons</div>
+          <div class="row"><span class="k">Mardi → Samedi</span>11h — 19h</div>
+          <div class="row"><span class="k">Sur rendez-vous</span>uniquement</div>
+        </div>
+      </div>
+
+      <div id="bookingForm"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FOOTER ============== -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-mark">To&amp;To<br/><em>Studio.</em></div>
+        <p class="mute" style="max-width: 320px;">Studio de tatouage inspiré de la peinture asiatique — fluidité, mouvement, encre vivante.</p>
+      </div>
+      <div>
+        <h5>Studio</h5>
+        <a href="#manifeste">Manifeste</a>
+        <a href="#galerie">Galerie</a>
+        <a href="#artistes">Artistes</a>
+        <a href="#process">Process</a>
+      </div>
+      <div>
+        <h5>Contact</h5>
+        <a href="mailto:bonjour@toto.studio">bonjour@toto.studio</a>
+        <a href="#booking">Prendre rendez-vous</a>
+        <a href="tel:+33142000000">+33 1 42 00 00 00</a>
+      </div>
+      <div>
+        <h5>Suivre</h5>
+        <a href="#">Instagram</a>
+        <a href="#">Are.na</a>
+        <a href="#">Journal</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 To&amp;To Studio · Bordeaux</span>
+      <span class="hand" style="font-size:18px;">tracé à l'encre.</span>
+    </div>
+  </div>
+</footer>
+
+</main>
+
+<!-- Tweaks defaults block (for the host) -->
+<script>
+  window.TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "accent": "#c0432a"
+  }/*EDITMODE-END*/;
+</script>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="app.jsx?v=2"></script>
+
+<!-- Scroll behavior + cursor + reveals (vanilla, no React needed) -->
+<script>
+(function(){
+  const nav = document.getElementById('nav');
+  const onScroll = () => {
+    const y = window.scrollY;
+    nav.classList.toggle('scrolled', y > 40);
+
+    // when over dark sections, switch to light text
+    const dark = [...document.querySelectorAll('.manifest, .booking')];
+    const navRect = nav.getBoundingClientRect();
+    const navMid = navRect.top + navRect.height/2;
+    let onDark = false;
+    for(const el of dark){
+      const r = el.getBoundingClientRect();
+      if(r.top <= navMid && r.bottom >= navMid){ onDark = true; break; }
+    }
+    nav.classList.toggle('on-dark', onDark);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Reveal observer
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal, .reveal-up').forEach(el => io.observe(el));
+
+  // Auto-add reveal-up to titles & paragraphs on first paint
+  document.querySelectorAll('h2.block-title, .block .lede, .gallery-head, .step, .artist-row, .form-card').forEach(el => {
+    if(!el.classList.contains('reveal') && !el.classList.contains('reveal-up')){
+      el.classList.add('reveal-up');
+      io.observe(el);
+    }
+  });
+
+  // Ink cursor (subtle)
+  const cursor = document.querySelector('.ink-cursor');
+  let cx = 0, cy = 0, tx = 0, ty = 0;
+  document.addEventListener('mousemove', (e) => {
+    document.body.classList.add('has-cursor');
+    tx = e.clientX; ty = e.clientY;
+  });
+  document.addEventListener('mouseleave', () => {
+    document.body.classList.remove('has-cursor');
+  });
+  function tick(){
+    cx += (tx - cx) * 0.15;
+    cy += (ty - cy) * 0.15;
+    cursor.style.left = cx + 'px';
+    cursor.style.top  = cy + 'px';
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  // Parallax respiration on hero art
+  const heroArt = document.querySelector('.hero-art');
+  if(heroArt){
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      heroArt.style.transform = `translateY(${y * 0.06}px)`;
+    }, { passive: true });
+  }
+})();
+</script>
+
+</body>
+</html>
