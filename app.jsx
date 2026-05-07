@@ -215,7 +215,7 @@ ReactDOM.createRoot(document.getElementById('bookingForm')).render(<BookingForm 
 const TWEAK_DEFAULTS = window.TWEAK_DEFAULTS;
 
 const ACCENT_OPTIONS = [
-  { hex:'#c0432a', name:'Vermillon' },
+  { hex:'#80152e', name:'Bordeaux'  },
   { hex:'#2b3a7a', name:'Indigo'    },
   { hex:'#7a8a5e', name:'Céladon'   },
   { hex:'#c98a2b', name:'Safran'    },
