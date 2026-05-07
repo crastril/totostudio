@@ -8,10 +8,10 @@ const { useState, useMemo, useEffect } = React;
 
 const WORKS = [
   { id:'w1', title:'Pivoine en lavis',     style:'sumi',     size:'wide', tag:'Avant-bras · 2026' },
-  { id:'w2', title:'Vague à l\'aube',      style:'ukiyo',    size:'tall', tag:'Dos · 2026' },
+  { id:'w2', title:'Vague à l\'aube',      style:'sumi',     size:'tall', tag:'Dos · 2026' },
   { id:'w3', title:'Cerisier nocturne',    style:'aquarelle',size:'mid',  tag:'Cuisse · 2025' },
   { id:'w4', title:'Sceau du voyageur',    style:'calli',    size:'mid',  tag:'Poignet · 2026' },
-  { id:'w5', title:'Carpes & courant',     style:'ukiyo',    size:'tall', tag:'Manchette · 2026' },
+  { id:'w5', title:'Carpes & courant',     style:'aquarelle',size:'tall', tag:'Manchette · 2026' },
   { id:'w6', title:'Encre qui s\'égare',   style:'aquarelle',size:'wide', tag:'Omoplate · 2025' },
   { id:'w7', title:'Bambou, vent du sud',  style:'sumi',     size:'tall', tag:'Mollet · 2026' },
   { id:'w8', title:'Trois caractères',     style:'calli',    size:'mid',  tag:'Nuque · 2025' },
@@ -21,7 +21,6 @@ const WORKS = [
 const FILTERS = [
   { k:'all',       l:'Tout' },
   { k:'sumi',      l:'Sumi-e' },
-  { k:'ukiyo',     l:'Ukiyo-e' },
   { k:'aquarelle', l:'Aquarelle' },
   { k:'calli',     l:'Calligraphie' },
 ];
@@ -93,7 +92,6 @@ ReactDOM.createRoot(document.getElementById('gallery')).render(<GalleryRoot />);
 
 const STYLES = [
   { k:'sumi',      t:'Sumi-e',       s:'Encre, lavis libre' },
-  { k:'ukiyo',     t:'Ukiyo-e',      s:'Estampe, couleur' },
   { k:'aquarelle', t:'Aquarelle',    s:'Lavis, taches' },
   { k:'calli',     t:'Calligraphie', s:'Caractères, mots' },
 ];
