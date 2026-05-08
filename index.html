@@ -715,40 +715,7 @@
     white-space:nowrap;
   }
   .btn-insta:hover{ background:var(--accent); border-color:var(--accent); }
-  .insta-grid{
-    display:grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 3px;
-  }
-  @media(max-width:900px){ .insta-grid{ grid-template-columns: repeat(3, 1fr); } }
-  @media(max-width:560px){ .insta-grid{ grid-template-columns: repeat(3, 1fr); } }
-  .insta-post{
-    aspect-ratio:1; position:relative; overflow:hidden;
-    display:block;
-    background: oklch(0.14 0.01 78);
-  }
-  .insta-post img{
-    position:absolute; inset:0; width:100%; height:100%;
-    object-fit:cover; display:block;
-    transition: transform .5s cubic-bezier(.4,0,.2,1);
-  }
-  .insta-post:hover img{ transform: scale(1.06); }
-  .insta-post::after{
-    content:''; position:absolute; inset:0;
-    background: var(--accent);
-    opacity:0; transition: opacity .4s;
-    mix-blend-mode: multiply;
-  }
-  .insta-post:hover::after{ opacity:.45; }
-  .insta-post-badge{
-    position:absolute; top: 8px; right: 8px; z-index:3;
-    pointer-events:none;
-  }
-  .insta-post-badge svg{
-    width:16px; height:16px;
-    filter: drop-shadow(0 1px 3px rgba(0,0,0,.6));
-    color: #fff;
-  }
+  behold-widget{ display:block; width:100%; }
   .insta-foot{
     margin-top: 28px; display:flex; align-items:center; gap:20px;
   }
@@ -951,51 +918,7 @@
       </a>
     </div>
 
-    <div class="insta-grid" role="list" aria-label="Derniers tatouages sur Instagram">
-
-      <a href="https://www.instagram.com/p/DX4a8BQiMN6/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="L'Oiseau de nuit adopté — voir sur Instagram">
-        <img src="https://scontent-sof1-2.cdninstagram.com/v/t51.82787-15/688338963_18128711596613797_7835940975654668276_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=108&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0FST1VTRUxfSVRFTS5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=mHSrp-dJ6oEQ7kNvwEJbqY8&_nc_oc=AdomO-cOdZUdxrOSQpTueYxI8sKfGrHQ2stCj9aVGFFsjsAnYFaM5SxPeSwupn-Vx_tVrEcbiAmnLWJVgTPocDzW&_nc_zt=23&_nc_ht=scontent-sof1-2.cdninstagram.com&edm=ANo9K5cEAAAA&oh=00_Af5tGhtm1l1fiLXFTMTPaAu1Oy_mgVKJqmAx8gxTHVv0tw&oe=6A0421E5" alt="L'Oiseau de nuit adopté" loading="lazy" />
-        <span class="insta-post-badge" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        </span>
-      </a>
-
-      <a href="https://www.instagram.com/p/DXdAWmuCOVf/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="Sakura — voir sur Instagram">
-        <img src="https://scontent-sof1-2.cdninstagram.com/v/t51.82787-15/670794605_18127651759613797_3608412976656323206_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=103&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0FST1VTRUxfSVRFTS5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=erDvPomjKysQ7kNvwGdkzY-&_nc_oc=AdpdbFdGsSlwOYYpM2F3I8xq_RlqIDqxKl-7qRpwSJbiiFl6fb1IPBu7fgLGa64oZy2vn-omAqFWXPw_lsW38PFT&_nc_zt=23&_nc_ht=scontent-sof1-2.cdninstagram.com&edm=ANo9K5cEAAAA&oh=00_Af6Q-QHnqwAZFOy0XBgCXgLazviEviQpXuYNq3lF1cKziQ&oe=6A040070" alt="Les plus beaux liens fleurissent avec le temps" loading="lazy" />
-        <span class="insta-post-badge" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        </span>
-      </a>
-
-      <a href="https://www.instagram.com/reel/DSpb2SgiLqx/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="Reel Go 2026 — voir sur Instagram">
-        <img src="https://scontent-sof1-2.cdninstagram.com/v/t51.82787-15/623288722_18118466737613797_3232705771409252193_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=108&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0xJUFMuYmVzdF9pbWFnZV91cmxnZW4uQzMifQ%3D%3D&_nc_ohc=lXcEw1MlQhYQ7kNvwHtTEo2&_nc_oc=AdrCsBaJe8LKRI_FpLd2GexoHdP3idUWvIGZhpUFeElbQagqbcmBsucV_pHhyu9wUGThrQro_cOyHj9kZyus3fRq&_nc_zt=23&_nc_ht=scontent-sof1-2.cdninstagram.com&edm=ANo9K5cEAAAA&oh=00_Af7bfWmNWEMMd3rykk-zsKbTH9veIaweohUIs9BRgtieoA&oe=6A042287" alt="Go 2026" loading="lazy" />
-        <span class="insta-post-badge" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        </span>
-      </a>
-
-      <a href="https://www.instagram.com/p/DSnDYNOCJiP/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="Raven Spirit — voir sur Instagram">
-        <img src="https://scontent-sof1-2.cdninstagram.com/v/t51.82787-15/601314233_18114804580613797_1086770072079513297_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=109&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0FST1VTRUxfSVRFTS5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=CMW_UrTpa-4Q7kNvwGWpC15&_nc_oc=AdqJQdo3wCeBHjl19i2EbtbpqRR9ieosb-4s5nLO3qkCTg1yckmK0a8kF4OHSacYdWY0rcu90klS3RCcQLlIdhXx&_nc_zt=23&_nc_ht=scontent-sof1-2.cdninstagram.com&edm=ANo9K5cEAAAA&oh=00_Af4w1aleU63ZgupFlzHW44bAowxr_s1QmhyXCeAQ6li0iQ&oe=6A040733" alt="Raven Spirit" loading="lazy" />
-        <span class="insta-post-badge" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        </span>
-      </a>
-
-      <a href="https://www.instagram.com/p/DRUGqRLCDvO/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="L'équilibre naît du mouvement — voir sur Instagram">
-        <img src="https://scontent-sof1-1.cdninstagram.com/v/t51.82787-15/582956496_18111569020613797_3479135558201194715_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=100&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0FST1VTRUxfSVRFTS5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=HY8dt862gIcQ7kNvwH4sBw-&_nc_oc=AdqU0NRI6u7gViEOBsiLq2S4mJvB3ghLAv1vA2NHOIeyzVkQYobpVLLOw5BxLvVCAE1Fxl2AjVcGWweVznyuSq2t&_nc_zt=23&_nc_ht=scontent-sof1-1.cdninstagram.com&edm=ANo9K5cEAAAA&oh=00_Af7qMrbKVYc83-1FoYRKPrgX_5gLMqqIMur9vW7PKMLW3Q&oe=6A04000F" alt="L'équilibre naît du mouvement" loading="lazy" />
-        <span class="insta-post-badge" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        </span>
-      </a>
-
-      <a href="https://www.instagram.com/reel/DO0aFnGiE8X/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="Reel To&To studio — voir sur Instagram">
-        <img src="https://scontent-sof1-2.cdninstagram.com/v/t51.71878-15/551070800_1159435586044026_4918998655083315157_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=110&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0xJUFMuYmVzdF9pbWFnZV91cmxnZW4uQzMifQ%3D%3D&_nc_ohc=WvoWK6obHD8Q7kNvwFydYfM&_nc_oc=Adoj__eVthvlvEtUWHveMX-6dasoR2Icxpo-b8WmDXQ1vZvglYIoQ-sLID1-K4TSZAsuuqnKzXhSdSDfsxB48vUs&_nc_zt=23&_nc_ht=scontent-sof1-2.cdninstagram.com&edm=ANo9K5cEAAAA&oh=00_Af5CxuyqBkNcY4dO9fKhPWqhxAvg_3P07mxZKIT1QDjNvw&oe=6A0417C8" alt="To&To studio est prêt à vous recevoir" loading="lazy" />
-        <span class="insta-post-badge" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        </span>
-      </a>
-
-    </div>
+    <behold-widget feed-id="LTQhqOcpW73cDhH9UpmI"></behold-widget>
 
     <div class="insta-foot">
       <span class="rule"></span>
@@ -1217,6 +1140,13 @@
 })();
 </script>
 
+
+<script>
+  (() => {
+    const d=document,s=d.createElement("script");s.type="module";
+    s.src="https://w.behold.so/widget.js";d.head.append(s);
+  })();
+</script>
 
 </body>
 </html>
