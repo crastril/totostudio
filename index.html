@@ -670,6 +670,86 @@
     --is-radius: 0;
   }
 
+  /* ---------- Instagram strip ---------- */
+  .insta-strip{
+    background: var(--ink);
+    color: var(--paper);
+    padding: 72px 0 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  .insta-strip::before{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence baseFrequency='0.88' numOctaves='2' seed='6'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.35'/></svg>");
+    mix-blend-mode: overlay; opacity: .4;
+  }
+  .insta-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 36px; flex-wrap:wrap; gap: 20px;
+  }
+  .insta-handle{
+    display:flex; align-items:center; gap: 20px;
+    text-decoration:none; color:inherit;
+  }
+  .insta-icon{ width: 34px; height: 34px; color: oklch(0.88 0.02 78 / .65); flex-shrink:0; }
+  .insta-name{
+    font-family:'Cormorant Garamond', serif; font-style:italic; font-weight:300;
+    font-size: clamp(30px, 3.5vw, 46px); line-height:1; color:var(--paper);
+  }
+  .insta-sub{
+    font-size:12px; letter-spacing:.15em; text-transform:uppercase;
+    color: oklch(0.88 0.02 78 / .45); font-weight:500; margin-top:6px;
+  }
+  .btn-insta{
+    font-size:13px; letter-spacing:.13em; text-transform:uppercase; font-weight:500;
+    font-family:'Inter', sans-serif;
+    padding: 13px 24px;
+    border: 1px solid oklch(0.88 0.02 78 / .3);
+    color:var(--paper); text-decoration:none;
+    transition: background .3s, border-color .3s;
+    white-space:nowrap;
+  }
+  .btn-insta:hover{ background:var(--accent); border-color:var(--accent); }
+  .insta-grid{
+    display:grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  @media(max-width:900px){ .insta-grid{ grid-template-columns: repeat(4, 1fr); } }
+  @media(max-width:560px){
+    .insta-grid{ grid-template-columns: repeat(3, 1fr); }
+    .insta-post:nth-child(n+7){ display:none; }
+  }
+  .insta-post{
+    aspect-ratio:1; position:relative; overflow:hidden;
+    display:block;
+    background: oklch(0.14 0.01 78);
+  }
+  .insta-post image-slot{
+    position:absolute; inset:0; width:100%; height:100%;
+    --is-bg: oklch(0.14 0.01 78);
+    --is-fg: oklch(0.32 0.02 78);
+    --is-border: transparent;
+    pointer-events:none;
+  }
+  .insta-post::after{
+    content:''; position:absolute; inset:0;
+    background: var(--accent);
+    opacity:0; transition: opacity .4s;
+    mix-blend-mode: multiply;
+  }
+  .insta-post:hover::after{ opacity:.5; }
+  .insta-foot{
+    margin-top: 28px; display:flex; align-items:center; gap:20px;
+  }
+  .insta-foot a{
+    font-family:'Cormorant Garamond', serif; font-style:italic; font-size:19px;
+    color: oklch(0.88 0.02 78 / .5);
+    text-decoration:none; transition:color .3s; white-space:nowrap;
+  }
+  .insta-foot a:hover{ color:var(--accent); }
+  .insta-foot .rule{ flex:1; height:1px; background: oklch(0.88 0.02 78 / .12); }
+
   /* ---------- Map ---------- */
   .booking-map{
     margin-top: 64px;
@@ -838,6 +918,58 @@
       <div id="filterBar"></div>
     </div>
     <div id="gallery"></div>
+  </div>
+</section>
+
+<!-- ============== INSTAGRAM ============== -->
+<!-- Pour afficher les vrais posts en live : connecter https://behold.so et remplacer la grille par leur widget -->
+<section class="insta-strip" aria-label="Aperçu Instagram @toto__tattoo">
+  <div class="wrap">
+    <div class="insta-head">
+      <a href="https://www.instagram.com/toto__tattoo/" target="_blank" rel="noopener noreferrer" class="insta-handle">
+        <svg class="insta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="2" width="20" height="20" rx="5"/>
+          <circle cx="12" cy="12" r="4.2"/>
+          <circle cx="17.4" cy="6.6" r="0.7" fill="currentColor" stroke="none"/>
+        </svg>
+        <div>
+          <div class="insta-name">@toto__tattoo</div>
+          <div class="insta-sub">Journal d'encre · Bordeaux</div>
+        </div>
+      </a>
+      <a href="https://www.instagram.com/toto__tattoo/" target="_blank" rel="noopener noreferrer" class="btn-insta">
+        Suivre sur Instagram
+      </a>
+    </div>
+
+    <div class="insta-grid" role="list" aria-label="Derniers tatouages sur Instagram">
+      <a href="https://www.instagram.com/toto__tattoo/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="Voir sur Instagram">
+        <image-slot id="ig-p1" placeholder="" shape="rect"></image-slot>
+      </a>
+      <a href="https://www.instagram.com/toto__tattoo/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="Voir sur Instagram">
+        <image-slot id="ig-p2" placeholder="" shape="rect"></image-slot>
+      </a>
+      <a href="https://www.instagram.com/toto__tattoo/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="Voir sur Instagram">
+        <image-slot id="ig-p3" placeholder="" shape="rect"></image-slot>
+      </a>
+      <a href="https://www.instagram.com/toto__tattoo/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="Voir sur Instagram">
+        <image-slot id="ig-p4" placeholder="" shape="rect"></image-slot>
+      </a>
+      <a href="https://www.instagram.com/toto__tattoo/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="Voir sur Instagram">
+        <image-slot id="ig-p5" placeholder="" shape="rect"></image-slot>
+      </a>
+      <a href="https://www.instagram.com/toto__tattoo/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="Voir sur Instagram">
+        <image-slot id="ig-p6" placeholder="" shape="rect"></image-slot>
+      </a>
+      <a href="https://www.instagram.com/toto__tattoo/" target="_blank" rel="noopener noreferrer" class="insta-post" role="listitem" aria-label="Voir sur Instagram">
+        <image-slot id="ig-p7" placeholder="" shape="rect"></image-slot>
+      </a>
+    </div>
+
+    <div class="insta-foot">
+      <span class="rule"></span>
+      <a href="https://www.instagram.com/toto__tattoo/" target="_blank" rel="noopener noreferrer">Voir toutes les pièces sur Instagram →</a>
+    </div>
   </div>
 </section>
 
