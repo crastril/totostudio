@@ -1071,57 +1071,44 @@
   if (!section) return;
   const NS = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(NS, 'svg');
-  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('viewBox', '0 0 100 1000');
   svg.setAttribute('preserveAspectRatio', 'none');
   svg.setAttribute('aria-hidden', 'true');
   svg.classList.add('brush-overlay');
-  const defsEl = document.createElementNS(NS, 'defs');
-  defsEl.innerHTML = `<filter id="inkRough" x="-10%" y="-10%" width="120%" height="120%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.06 0.09" numOctaves="2" seed="13" result="n"/>
-    <feDisplacementMap in="SourceGraphic" in2="n" scale="8" xChannelSelector="R" yChannelSelector="G"/>
+
+  const defs = document.createElementNS(NS, 'defs');
+  defs.innerHTML = `<filter id="inkSingle" x="-50%" y="-2%" width="200%" height="104%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.018 0.007" numOctaves="5" seed="17" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="22" xChannelSelector="R" yChannelSelector="G" result="d"/>
+    <feGaussianBlur in="d" stdDeviation="2.5"/>
   </filter>`;
-  svg.appendChild(defsEl);
-  const strokes = [
-    { d:'M-2 13 C 15 7,48 16,78 11 S 100 9,104 12',            w:14, op:.52, s:.04, e:.20 },
-    { d:'M 86 4 C 79 18,64 33,49 49 C 41 58,37 68,40 76',      w:18, op:.38, s:.12, e:.30 },
-    { d:'M 6 33 C 24 27,46 35,63 31 S 78 29,80 31',            w: 9, op:.58, s:.24, e:.38 },
-    { d:'M-2 53 C 22 46,58 55,90 50 S 104 48,107 50',          w:20, op:.35, s:.34, e:.53 },
-    { d:'M 74 41 C 78 53,80 66,76 78 S 70 88,72 94',           w:11, op:.46, s:.46, e:.62 },
-    { d:'M 7 71 C 28 64,54 72,78 68 S 90 66,93 68',            w:13, op:.44, s:.56, e:.72 },
-    { d:'M-3 86 C 26 80,62 88,98 84 S 108 82,112 85',          w:22, op:.30, s:.67, e:.86 },
-    { d:'M 46 93 C 55 89,68 91,76 97',                         w: 7, op:.55, s:.82, e:.94 },
-  ];
-  const items = strokes.map(st => {
-    const p = document.createElementNS(NS, 'path');
-    p.setAttribute('d', st.d);
-    p.setAttribute('fill', 'none');
-    p.setAttribute('stroke', `rgba(16,14,24,${st.op})`);
-    p.setAttribute('stroke-width', st.w);
-    p.setAttribute('stroke-linecap', 'round');
-    p.setAttribute('stroke-linejoin', 'round');
-    p.setAttribute('vector-effect', 'non-scaling-stroke');
-    p.setAttribute('filter', 'url(#inkRough)');
-    svg.appendChild(p);
-    return { p, st };
-  });
+  svg.appendChild(defs);
+
+  /* Single bold calligraphic stroke — gentle S-curve along left margin */
+  const path = document.createElementNS(NS, 'path');
+  path.setAttribute('d', 'M 9 0 C 4 130, 14 270, 8 420 C 3 570, 13 710, 7 860 C 2 950, 10 985, 8 1000');
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', 'rgba(16,12,20,0.20)');
+  path.setAttribute('stroke-width', '42');
+  path.setAttribute('stroke-linecap', 'round');
+  path.setAttribute('stroke-linejoin', 'round');
+  path.setAttribute('vector-effect', 'non-scaling-stroke');
+  path.setAttribute('filter', 'url(#inkSingle)');
+  svg.appendChild(path);
   section.appendChild(svg);
-  /* measure after mount */
-  const measured = items.map(({ p, st }) => {
-    const len = p.getTotalLength();
-    p.style.strokeDasharray = `${len} ${len}`;
-    p.style.strokeDashoffset = len;
-    return { p, st, len };
-  });
+
+  const len = path.getTotalLength();
+  path.style.strokeDasharray = `${len} ${len}`;
+  path.style.strokeDashoffset = len;
+
   function tick() {
     const r = section.getBoundingClientRect();
     const h = section.offsetHeight;
+    /* progress: 0 when section top hits 30% from top of viewport → 1 when section bottom exits */
     const progress = Math.max(0, Math.min(1,
-      (-r.top + window.innerHeight * 0.4) / (h + window.innerHeight * 0.1)
+      (-r.top + window.innerHeight * 0.3) / (h * 0.9)
     ));
-    measured.forEach(({ p, st, len }) => {
-      const t = Math.max(0, Math.min(1, (progress - st.s) / (st.e - st.s)));
-      p.style.strokeDashoffset = len * (1 - t);
-    });
+    path.style.strokeDashoffset = len * (1 - progress);
   }
   window.addEventListener('scroll', tick, { passive: true });
   tick();
