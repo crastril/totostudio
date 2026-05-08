@@ -667,6 +667,25 @@
     --is-radius: 0;
   }
 
+  /* ---------- Map ---------- */
+  .booking-map{
+    margin-top: 64px;
+    position: relative;
+  }
+  .booking-map iframe{
+    width: 100%; height: 340px; border: 0;
+    filter: grayscale(30%) contrast(0.92) brightness(0.88);
+    display: block;
+  }
+  .booking-map-label{
+    position: absolute; top: 16px; left: 16px;
+    background: var(--ink); color: var(--paper);
+    padding: 8px 14px;
+    font-family: 'Inter', sans-serif; font-size: 13px;
+    font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
+    pointer-events: none;
+  }
+
   /* ---------- Tweaks panel custom width ---------- */
   .twk-panel{ width: 270px !important; }
 
@@ -891,14 +910,25 @@
           le temps qu'il lise, dessine et reprenne contact.
         </p>
         <div class="practical">
-          <div class="row"><span class="k">Studio</span>Bordeaux centre</div>
-          <div class="row"><span class="k">Quartier</span>Saint-Pierre · Chartrons</div>
+          <div class="row"><span class="k">Adresse</span>112 Route de Toulouse</div>
+          <div class="row"><span class="k">Ville</span>33130 Bègles</div>
           <div class="row"><span class="k">Mardi → Samedi</span>11h — 19h</div>
           <div class="row"><span class="k">Sur rendez-vous</span>uniquement</div>
         </div>
       </div>
 
       <div id="bookingForm"></div>
+    </div>
+
+    <div class="booking-map">
+      <div class="booking-map-label">112 Route de Toulouse · Bègles</div>
+      <iframe
+        src="https://maps.google.com/maps?q=112+Route+de+Toulouse,+33130+B%C3%A8gles,+France&output=embed&z=15"
+        title="To&amp;To Studio — 112 Route de Toulouse, 33130 Bègles"
+        allowfullscreen
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
     </div>
   </div>
 </section>
